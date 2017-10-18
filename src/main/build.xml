@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+	
+<project name="smartNodeProtocol" default="archive" basedir=".">
+	
+    <description>
+           Smart Node Protocol Application Build
+    </description>
+	
+	<property file="build.properties"/>
+	<!-- ==================== Clean Target ==================================== -->
+
+	<!--
+	  The "clean" target deletes any previous "build" and "dist" directory,
+	  so that you can be ensured the application can be built from scratch.
+	-->
+	<target name="clean" description="Delete old build and dist directories">
+		<delete dir="${dist.home}"/>
+		<delete dir="${build.home}"/>
+	</target>
+	<target name="cleanTomcat" description="Delete old tomcat deployment">
+		<delete dir="${tomcat.deploy.dir}"/>
+	</target>
+
+	<!-- ==================== Init Target ================================== -->
+
+	<!--
+	  The "init" target is used to create the "build" destination directory,
+	  Normally, this task is executed indirectly when needed.
+	-->
+	<target name="init" depends="clean"  description="Create build directory">
+		<mkdir dir="${build.home}" />
+	</target>
+	
+	<target name="build" description="Copies all non Java classes to build directoy">
+		<copy todir="${build.home}">
+			<fileset dir="${webroot.home}" excludes="CVS,**/*.class,dojo/**/*.*" />
+		</copy>
+		<copy todir="${build.home}/WEB-INF/classes">
+			<fileset dir="${classes.home}" excludes="CVS" />
+		</copy>
+	</target>
+	<target name="buildWeb" description="Copies all non Java classes to build directoy">
+		<copy todir="${build.home}/WEB-INF">
+			<fileset dir="${webroot.webinf}" excludes="CVS,dojo/**/*.xml " />
+		</copy>
+		<copy todir="${build.home}/WEB-INF/classes">
+			<fileset dir="${classes.home}" excludes="CVS" />
+		</copy>
+	</target>
+	<target name="deploy" depends="buildWeb,deployLib" description="Copies all Java classes to server directory">
+		<copy overwrite="true" todir="${tomcat.deploy.dir}/WEB-INF/classes" >
+			<fileset dir="${classes.home}" excludes="CVS" />
+		</copy>
+		<copy overwrite="true" todir="${tomcat.deploy.dir}/WEB-INF">
+			<fileset dir="${webroot.webinf}" excludes="CVS" />
+		</copy>
+		<copy overwrite="true" todir="${tomcat.deploy.dir}">
+			<fileset dir="${webroot.home}" includes="*.jsp " />
+		</copy>
+		<copy overwrite="true" todir="${tomcat.deploy.dir}">
+			<fileset dir="${webroot.home}"/>
+		</copy>
+	</target>
+	<target name="deployWeb" description="Copies all non Java classes to server directory">
+		<copy overwrite="false" todir="${tomcat.deploy.dir}">
+			<fileset dir="${webroot.home}" includes="**/*.jsp, **/*.xml, **/*.js" />
+		</copy>
+	</target>
+	<target name="deployLib" description="Copies all non Java classes to server directory">
+		<copy overwrite="false" todir="${tomcat.deploy.dir}/WEB-INF/lib">
+			<fileset dir="${lib.home}" includes="**/*.jar" />
+		</copy>
+	</target>
+	<target name="archive"  depends="build"  description="Create application WAR file">
+		<mkdir     dir="${dist.home}" />
+	    <jar jarfile="${dist.home}/${webapp.name}.war" basedir="${build.home}" />
+	</target>
+</project>
+
